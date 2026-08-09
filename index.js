@@ -11,7 +11,6 @@ const PORT = process.env.PORT || 10000;
 app.get('/', (req, res) => res.send('PokéBot activo 🚀'));
 app.listen(PORT, () => console.log(`Servidor activo en puerto ${PORT}`));
 
-// Configuración ligera de Puppeteer para no agotar la RAM de Render
 const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
@@ -23,7 +22,6 @@ const client = new Client({
             '--disable-accelerated-2d-canvas',
             '--no-first-run',
             '--no-zygote',
-            '--single-process', // Ahorra mucha memoria RAM
             '--disable-gpu'
         ]
     }
