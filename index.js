@@ -3,22 +3,15 @@ const qrcode = require('qrcode-terminal');
 const express = require('express');
 const { ejecutarComando } = require('./comandos');
 
-// Base de datos en memoria para los usuarios
 const usuariosBD = {};
 
-// 1. Servidor Express para mantener el puerto de Render activo
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-app.get('/', (req, res) => {
-    res.send('PokéBot activo 🚀');
-});
+app.get('/', (req, res) => res.send('PokéBot activo 🚀'));
+app.listen(PORT, () => console.log(`Servidor activo en puerto ${PORT}`));
 
-app.listen(PORT, () => {
-    console.log(`Servidor activo en puerto ${PORT}`);
-});
-
-// 2. Configuración del cliente de WhatsApp
+// Configuración ligera de Puppeteer para no agotar la RAM de Render
 const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
@@ -30,28 +23,27 @@ const client = new Client({
             '--disable-accelerated-2d-canvas',
             '--no-first-run',
             '--no-zygote',
+            '--single-process', // Ahorra mucha memoria RAM
             '--disable-gpu'
         ]
     }
 });
 
-// Muestra el QR en la consola/logs
 client.on('qr', (qr) => {
-    console.log('--- ESCANEA ESTE CÓDIGO QR EN WHATSAPP ---');
+    console.log('========================================');
+    console.log('ESCANEA ESTE CÓDIGO QR EN WHATSAPP:');
+    console.log('========================================');
     qrcode.generate(qr, { small: true });
 });
 
-// Notifica cuando el bot está conectado
 client.on('ready', () => {
     console.log('¡PokéBot conectado y listo para recibir mensajes! 🎉');
 });
 
-// 3. Manejo de mensajes entrantes
 client.on('message_create', async (msg) => {
     if (!msg.body) return;
 
     try {
-        // Determina si el mensaje lo enviaste tú mismo o viene de otro usuario
         const remitente = msg.fromMe ? msg.to : msg.from;
         const resultado = await ejecutarComando(msg.body, remitente, usuariosBD);
 
@@ -72,5 +64,4 @@ client.on('message_create', async (msg) => {
     }
 });
 
-// Inicialización del cliente
 client.initialize();
