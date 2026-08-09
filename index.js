@@ -40,24 +40,21 @@ client.on('ready', () => {
 
 // 3. Manejo de mensajes entrantes
 client.on('message_create', async (msg) => {
+    // Esto asegura que reponda tanto a tus propios mensajes como a los de otros
     if (!msg.body) return;
 
     const remitente = msg.from;
     const resultado = await ejecutarComando(msg.body, remitente, usuariosBD);
 
     if (resultado) {
-        // Si el resultado es un objeto con imagen (ej: .capturar)
         if (typeof resultado === 'object' && resultado.imagen) {
             try {
                 const media = await MessageMedia.fromUrl(resultado.imagen);
                 await client.sendMessage(msg.from, media, { caption: resultado.texto });
             } catch (error) {
-                // Si falla la imagen, envía al menos el texto
                 await msg.reply(resultado.texto);
             }
-        } 
-        // Si el resultado es solo texto
-        else if (typeof resultado === 'string') {
+        }  else if (typeof resultado === 'string') {
             await msg.reply(resultado);
         }
     }
