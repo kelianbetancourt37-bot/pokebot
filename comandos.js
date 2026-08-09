@@ -1,6 +1,6 @@
 const fetch = require('node-fetch');
 
-// Lista de nombres de las primeras 4 generaciones para no depender de llamadas lentas
+// Lista de nombres de las primeras 4 generaciones
 const POKEMON_NOMBRES = [
     "Bulbasaur", "Ivysaur", "Venusaur", "Charmander", "Charmeleon", "Charizard",
     "Squirtle", "Wartortle", "Blastoise", "Caterpie", "Metapod", "Butterfree",
@@ -33,7 +33,7 @@ const POKEMON_NOMBRES = [
     "Bonsly", "Mime Jr.", "Happiny", "Chatot", "Spiritomb", "Gible", "Gabite",
     "Garchomp", "Munchlax", "Riolu", "Lucario", "Hippopotas", "Skorupi", "Croagunk",
     "Carnivine", "Finneon", "Mantyke", "Snover", "Weavile", "Magnezone", "Rhyperior",
-    "Tangrowth", "Electivire", "Magmortar", "Togekiss", "Yanmega", "L Leafeon",
+    "Tangrowth", "Electivire", "Magmortar", "Togekiss", "Yanmega", "Leafeon",
     "Glaceon", "Gliscor", "Mamoswine", "Porygon-Z", "Gallade", "Probopass", "Dusknoir",
     "Froslass", "Rotom", "Uxie", "Mesprit", "Azelf", "Dialga", "Palkia", "Heatran",
     "Regigigas", "Giratina", "Cresselia", "Phione", "Manaphy", "Darkrai", "Shaymin", "Arceus"
@@ -124,11 +124,8 @@ const comandos = {
 
         usuario.pokeballs--;
 
-        // Número aleatorio del 1 al 250 (o hasta el total de la lista)
         const idAzar = Math.floor(Math.random() * POKEMON_NOMBRES.length) + 1;
         const nombrePkm = POKEMON_NOMBRES[idAzar - 1] || `Pokémon #${idAzar}`;
-        
-        // Sprite directo PNG en alta velocidad
         const urlImagen = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${idAzar}.png`;
 
         const exito = Math.random() < 0.75;
@@ -164,7 +161,7 @@ const comandos = {
         }
     },
 
-    // 1. TIENDA (Solo devuelve el texto)
+    // TIENDA
     '.tienda': (args, usuario) => {
         return `🏪 *TIENDA POKÉMON* 🏪\n` +
                `━━━━━━━━━━━━━━━━━━━━━━━\n` +
@@ -175,7 +172,7 @@ const comandos = {
                `   ↳ Escribe *.comprar posion*`;
     },
 
-    // 2. COMANDO PARA COMPRAR POSION (Irá como una función propia)
+    // COMPRAR POCION
     '.comprar posion': (args, usuario) => {
         if (usuario.monedas < 30) {
             return `❌ Monedas insuficientes. Necesitas $30 y tienes $${usuario.monedas}.`;
@@ -189,7 +186,7 @@ const comandos = {
                `🪙 Monedas restantes: $${usuario.monedas}`;
     },
 
-    // 3. COMANDO PARA COMPRAR POKEBALL
+    // COMPRAR POKEBALL
     '.comprar pokeball': (args, usuario) => {
         if (usuario.monedas < 50) {
             return `❌ Monedas insuficientes. Necesitas $50 y tienes $${usuario.monedas}.`;
@@ -202,23 +199,36 @@ const comandos = {
                `🎒 Tienes ${usuario.pokeballs} Pokéballs.\n` +
                `🪙 Monedas restantes: $${usuario.monedas}`;
     }
+};
+
+// EJECUTAR COMANDO
 async function ejecutarComando(texto, remitente, usuariosBD) {
-    const partes = texto.trim().split(' ');
-    const comando = partes[0].toLowerCase();
+    const textoLimpio = texto.trim();
+    const partes = textoLimpio.split(' ');
+    const comandoSimple = partes[0].toLowerCase();
+    const comandoCompleto = textoLimpio.toLowerCase();
     const args = partes.slice(1);
 
     const usuario = usuariosBD[remitente];
 
-    if (comando === '.registrar') {
+    // Verificar si es registro
+    if (comandoSimple === '.registrar') {
         return await comandos['.registrar'](args, usuario, remitente, usuariosBD);
     }
 
-    if (!usuario && comando.startsWith('.')) {
-        return `⚠️ *¡NO ESTÁS REGISTRADO!*\n\n👉 Registrarte escribiendo: *.registrar TuNombre*\n*Ejemplo:* .registrar Ash`;
+    // Si intenta usar un comando sin estar registrado
+    if (!usuario && textoLimpio.startsWith('.')) {
+        return `⚠️ *¡NO ESTÁS REGISTRADO!*\n\n👉 Regístrate escribiendo: *.registrar TuNombre*\n*Ejemplo:* .registrar Ash`;
     }
 
-    if (comandos[comando]) {
-        return await comandos[comando](args, usuario, remitente, usuariosBD);
+    // Detectar comandos compuestos de 2 palabras (ej: .comprar pokeball)
+    if (comandos[comandoCompleto]) {
+        return await comandos[comandoCompleto](args, usuario);
+    }
+
+    // Detectar comandos simples de 1 palabra (ej: .menu, .mochila)
+    if (comandos[comandoSimple]) {
+        return await comandos[comandoSimple](args, usuario, remitente, usuariosBD);
     }
 
     return null;
