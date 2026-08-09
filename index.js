@@ -13,7 +13,6 @@ const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
         headless: true,
-        executablePath: '/data/data/com.termux/files/usr/bin/chromium',
         args: [
             '--no-sandbox',
             '--disable-setuid-sandbox',
