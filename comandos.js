@@ -164,17 +164,32 @@ const comandos = {
         }
     },
 
-    // TIENDA
+    // 1. TIENDA (Solo devuelve el texto)
     '.tienda': (args, usuario) => {
         return `🏪 *TIENDA POKÉMON* 🏪\n` +
                `━━━━━━━━━━━━━━━━━━━━━━━\n` +
                `🪙 *Tus monedas:* $${usuario.monedas}\n\n` +
                `🔴 *Pokéball* - $50 Monedas\n` +
-               `   ↳ Escribe *.comprar pokeball*`
+               `   ↳ Escribe *.comprar pokeball*\n` +
+               `🧪 *Poción* - $30 Monedas\n` +
                `   ↳ Escribe *.comprar posion*`;
     },
 
-    // COMPRAR
+    // 2. COMANDO PARA COMPRAR POSION (Irá como una función propia)
+    '.comprar posion': (args, usuario) => {
+        if (usuario.monedas < 30) {
+            return `❌ Monedas insuficientes. Necesitas $30 y tienes $${usuario.monedas}.`;
+        }
+
+        usuario.monedas -= 30;
+        usuario.pociones += 1;
+
+        return `✅ ¡Compraste 1 🧪 Poción!\n` +
+               `🎒 Tienes ${usuario.pociones} Pociones.\n` +
+               `🪙 Monedas restantes: $${usuario.monedas}`;
+    },
+
+    // 3. COMANDO PARA COMPRAR POKEBALL
     '.comprar pokeball': (args, usuario) => {
         if (usuario.monedas < 50) {
             return `❌ Monedas insuficientes. Necesitas $50 y tienes $${usuario.monedas}.`;
@@ -187,8 +202,6 @@ const comandos = {
                `🎒 Tienes ${usuario.pokeballs} Pokéballs.\n` +
                `🪙 Monedas restantes: $${usuario.monedas}`;
     }
-};
-
 async function ejecutarComando(texto, remitente, usuariosBD) {
     const partes = texto.trim().split(' ');
     const comando = partes[0].toLowerCase();
