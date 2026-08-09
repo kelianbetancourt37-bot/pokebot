@@ -1,16 +1,16 @@
-const { Client, LocalAuth } = require('whatsapp-web.js');
+const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const express = require('express');
+const { ejecutarComando } = require('./comandos'); // Importa tu archivo de comandos
 
-// 1. Servidor Express para mantener el servicio activo en Render
+// Base de datos en memoria para los usuarios
+const usuariosBD = {};
+
+// 1. Servidor Express
 const app = express();
 const PORT = process.env.PORT || 10000;
-
-app.get('/', (req, res) => res.send('Bot activo 🚀'));
-
-app.listen(PORT, () => {
-    console.log(`Servidor activo en puerto ${PORT}`);
-});
+app.get('/', (req, res) => res.send('PokéBot activo 🚀'));
+app.listen(PORT, () => console.log(`Servidor activo en puerto ${PORT}`));
 
 // 2. Configuración del cliente
 const client = new Client({
@@ -29,32 +29,38 @@ const client = new Client({
     }
 });
 
-// 3. Evento para mostrar el código QR si se requiere reconexión
 client.on('qr', (qr) => {
-    console.log('Escanea este código QR con WhatsApp:');
+    console.log('Escanea el QR:');
     qrcode.generate(qr, { small: true });
 });
 
-// 4. Confirmación de conexión exitosa
 client.on('ready', () => {
-    console.log('¡PokéBot conectado y listo para recibir mensajes! 🎉');
+    console.log('¡PokéBot conectado y listo! 🎉');
 });
 
-// 5. ESCUCHADOR DE MENSAJES Y COMANDOS
+// 3. Manejo de mensajes entrantes
 client.on('message_create', async (msg) => {
-    // Convierte el mensaje a minúsculas
-    const texto = msg.body.toLowerCase();
+    if (!msg.body) return;
 
-    // Ejemplo de comando !ping
-    if (texto === '!ping') {
-        await msg.reply('pong 🏓');
-    }
+    const remitente = msg.from;
+    const resultado = await ejecutarComando(msg.body, remitente, usuariosBD);
 
-    // Ejemplo de comando !hola
-    if (texto === '!hola') {
-        await msg.reply('¡Hola! Soy PokéBot 🤖 ¿En qué te puedo ayudar?');
+    if (resultado) {
+        // Si el resultado es un objeto con imagen (ej: .capturar)
+        if (typeof resultado === 'object' && resultado.imagen) {
+            try {
+                const media = await MessageMedia.fromUrl(resultado.imagen);
+                await client.sendMessage(msg.from, media, { caption: resultado.texto });
+            } catch (error) {
+                // Si falla la imagen, envía al menos el texto
+                await msg.reply(resultado.texto);
+            }
+        } 
+        // Si el resultado es solo texto
+        else if (typeof resultado === 'string') {
+            await msg.reply(resultado);
+        }
     }
 });
 
-// 6. Inicializar el cliente
 client.initialize();
