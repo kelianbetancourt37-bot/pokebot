@@ -27,7 +27,7 @@ const client = new Client({
 client.on('qr', async () => {
     // Reemplaza con tu número de teléfono (con código de país sin el símbolo +)
     // Ejemplo para México (+52): '521234567890'
-    const numeroTelefono = 'TU_NUMERO_AQUI'; 
+   const numeroTelefono = '559581068631';
 
     try {
         const codigo = await client.requestPairingCode(numeroTelefono);
