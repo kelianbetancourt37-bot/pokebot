@@ -60,7 +60,7 @@ const comandos = {
             pokemon: []
         };
 
-        return `🎉 ¡Felicidades *${nombreElegido}*! Te has registrado en **PokeBot**.\n\n` +
+        return `🎉 ¡Felicidades *${nombreElegido}*! Te has registrado en **Agnes Tachyion**.\n\n` +
                `🎁 *Regalo:* 🔴 x10 Pokéballs | 🪙 $100 Monedas\n` +
                `💡 Escribe *.menu* para empezar.`;
     },
@@ -170,7 +170,8 @@ const comandos = {
                `━━━━━━━━━━━━━━━━━━━━━━━\n` +
                `🪙 *Tus monedas:* $${usuario.monedas}\n\n` +
                `🔴 *Pokéball* - $50 Monedas\n` +
-               `   ↳ Escribe *.comprar pokeball*`;
+               `   ↳ Escribe *.comprar pokeball*`
+               `   ↳ Escribe *.comprar posion*`;
     },
 
     // COMPRAR
