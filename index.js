@@ -1,5 +1,4 @@
 const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
-const qrcode = require('qrcode-terminal');
 const express = require('express');
 const { ejecutarComando } = require('./comandos');
 
@@ -7,7 +6,6 @@ const usuariosBD = {};
 
 const app = express();
 const PORT = process.env.PORT || 10000;
-
 app.get('/', (req, res) => res.send('PokéBot activo 🚀'));
 app.listen(PORT, () => console.log(`Servidor activo en puerto ${PORT}`));
 
@@ -15,7 +13,7 @@ const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
         headless: true,
-        executablePath: '/data/data/com.termux/files/usr/bin/chromium',
+        executablePath: '/data/data/com.termux/files/usr/bin/chromium', // Si usas Termux
         args: [
             '--no-sandbox',
             '--disable-setuid-sandbox',
@@ -25,11 +23,20 @@ const client = new Client({
     }
 });
 
-client.on('qr', (qr) => {
-    console.log('========================================');
-    console.log('ESCANEA ESTE CÓDIGO QR EN WHATSAPP:');
-    console.log('========================================');
-    qrcode.generate(qr, { small: true });
+// Evento para generar el código de vinculación por número de teléfono
+client.on('qr', async () => {
+    // Reemplaza con tu número de teléfono (con código de país sin el símbolo +)
+    // Ejemplo para México (+52): '521234567890'
+    const numeroTelefono = 'TU_NUMERO_AQUI'; 
+
+    try {
+        const codigo = await client.requestPairingCode(numeroTelefono);
+        console.log('========================================');
+        console.log(`TU CÓDIGO DE VINCULACIÓN ES: ${codigo}`);
+        console.log('========================================');
+    } catch (err) {
+        console.error('Error al generar el código:', err);
+    }
 });
 
 client.on('ready', () => {
