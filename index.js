@@ -13,7 +13,7 @@ const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
         headless: true,
-        executablePath: '/data/data/com.termux/files/usr/bin/chromium', // Si usas Termux
+        executablePath: '/data/data/com.termux/files/usr/bin/chromium',
         args: [
             '--no-sandbox',
             '--disable-setuid-sandbox',
@@ -25,9 +25,7 @@ const client = new Client({
 
 // Evento para generar el código de vinculación por número de teléfono
 client.on('qr', async () => {
-    // Reemplaza con tu número de teléfono (con código de país sin el símbolo +)
-    // Ejemplo para México (+52): '521234567890'
-   const numeroTelefono = '559581068631';
+    const numeroTelefono = '559581068631';
 
     try {
         const codigo = await client.requestPairingCode(numeroTelefono);
